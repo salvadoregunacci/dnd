@@ -3,6 +3,7 @@
 // =========================
 
 const $dnd = document.querySelector('.dnd');
+const $dndWrap = document.querySelector('.dnd__wrap');
 const $dndUploadImg = document.querySelector('.dnd__upload_images');
 const $loadForm = document.getElementById('dnd__form');
 const $submitBtn = document.querySelector('.dnd__submit_btn');
@@ -17,22 +18,22 @@ if ($submitBtn) {
   $submitBtn.addEventListener("click", submitForm);
 }
 
-if ($dnd) {
-  $dnd.addEventListener("dragenter", (e) => {
+if ($dnd && $dndWrap) {
+  $dndWrap.addEventListener("dragenter", (e) => {
     e.preventDefault();
     $dnd.classList.add("active");
   });
 
-  $dnd.addEventListener("dragleave", (e) => {
+  $dndWrap.addEventListener("dragleave", (e) => {
     e.preventDefault();
     $dnd.classList.remove("active");
   });
 
-  $dnd.addEventListener("dragover", (e) => {
+  $dndWrap.addEventListener("dragover", (e) => {
     e.preventDefault();
   });
 
-  $dnd.addEventListener("drop", (e) => {
+  $dndWrap.addEventListener("drop", (e) => {
     e.preventDefault();
 
     const _file = e.dataTransfer.files[0];
@@ -77,7 +78,7 @@ if ($dnd) {
       $dnd.classList.add("err");
       $dnd.classList.remove("active");
 
-      setTimeout(()=> {
+      setTimeout(() => {
         $dnd.classList.remove("err");
       }, 3000);
     }
@@ -93,8 +94,8 @@ function removeUploadImage(e) {
   curImg.remove();
   _uploadFiles.pop();
 
-  if($dnd &&_uploadFiles.length <= 0 && $submitBtn) {
-    $dnd.classList.remove("complete");
+  if ($dndWrap && _uploadFiles.length <= 0 && $submitBtn) {
+    $dndWrap.classList.remove("complete");
     $submitBtn.setAttribute("hidden", "");
   }
 }
@@ -112,12 +113,148 @@ function submitForm() {
   $loadForm.submit();
 }
 
+// ===============================================
+// ===============================================
+// ===============================================
+// ===============================================
+// ===============================================
+// ===============================================
+
 class DND {
-  constructor(options) {
+  constructor(createEl = ".dnd_el", options) {
+
+    this._uploadFiles = [];
+    this.dom = {
+      $dnd: null,
+      $dndWrap: null,
+      $dndUploadImg: null,
+      $loadForm: null,
+      $submitBtn: null,
+      $fileInput: null,
+    };
+
+    this._eHandlers = {
+      dragenter: this._dragEnterHandler.bind(this),
+      dragleave: this._dragLeaveHandler.bind(this),
+      dragover: this._dragOverHandler.bind(this),
+      drop: this._dragDropHandler.bind(this)
+    };
+
     this._options = {
-      multiple: false,
-      validTypes: "*",
-      uiStyle: "default"
+      actionPath: options.actionPath || "#",
+      multiple: options.multiple || false,
+      validTypes: options.validTypes || "*",
+      uiStyle: options.uiStyle || "default"
+    };
+
+    this.__ = {
+      btnSaveTxt: "Сохранить",
+      defaultTitle: "Перетащите файлы сюда",
+      dropTitle: "Отпустите файл",
+      alertTxt: {
+        onlyPhoto: "Можно загрузить только фото!"
+      }
+    };
+
+    this._init(createEl);
+  }
+
+
+  _init(createEl) {
+    try {
+      this._wrap = document.querySelector(createEl);
+
+      if (!this._wrap) {
+        throw new Error("Container element not found");
+      }
+
+      this._addToDOM();
+      this._initToDOM();
+      this._addEventHandlers();
+    } catch (err) {
+      console.error(err.message);
     }
   }
+
+
+  _addToDOM() {
+    this._wrap.innerHTML = this._getHtml();
+  }
+
+
+  _addEventHandlers() {
+    this.dom.$dndWrap.addEventListener("dragenter", this._eHandlers.dragenter);
+    this.dom.$dndWrap.addEventListener("dragleaver", this._eHandlers.dragleave);
+    this.dom.$dndWrap.addEventListener("dragover", this._eHandlers.dragover);
+    this.dom.$dndWrap.addEventListener("drop", this._eHandlers.drop);
+  }
+
+  // event handlers
+  _dragEnterHandler(e) {
+    e.preventDefault();
+    console.log(this);
+    this.dom.$dnd.classList.add("active");
+    // console.log("enter");
+  }
+
+  _dragLeaveHandler(e) {
+    e.preventDefault();
+    this.dom.$dnd.classList.remove("active");
+    // console.log("leave");
+  }
+
+  _dragOverHandler(e) {
+    e.preventDefault();
+    // console.log("over");
+  }
+
+  _dragDropHandler(e) {
+    e.preventDefault();
+    // console.log("drop");
+  }
+  // # event handlers
+
+
+  _initToDOM() {
+    this.dom.$dnd = this._wrap.querySelector('.dnd');
+    this.dom.$dndWrap = this._wrap.querySelector('.dnd__wrap');
+    this.dom.$dndUploadImg = this._wrap.querySelector('.dnd__upload_images');
+    this.dom.$loadForm = this._wrap.querySelector('.dnd__form');
+    this.dom.$submitBtn = this._wrap.querySelector('.dnd__submit_btn');
+    this.dom.$fileInput = this._wrap.querySelector('.dnd__file_input');
+
+    for (const key in this.dom) {
+      if (Object.hasOwnProperty.call(this.dom, key)) {
+        const el = this.dom[key];
+
+        if (el === null) throw new Error(`required DOM element not found | element: ${key}`);
+      }
+    }
+  }
+
+
+  _getHtml() {
+    return `
+    <div class="dnd" data-ui-style="${this._options.uiStyle}">
+      <div class="dnd__wrap">
+          <span class="dnd__title dnd__title_enter">${this.__.defaultTitle}</span>
+          <span class="dnd__title dnd__title_drop">${this.__.dropTitle}</span>
+          <div class="dnd__alert">${this.__.alertTxt.onlyPhoto}</div>
+
+          <div class="dnd__upload_images"></div>
+      </div>
+
+      <button hidden class="dnd__submit_btn">${this.__.btnSaveTxt}</button>
+
+      <form hidden class="dnd__form" action="${this._options.actionPath}" method="POST" enctype="multipart/form-data">
+          <input type="file" name="img" class="dnd__file_input">
+      </form>
+    </div>
+    `;
+  }
 }
+
+
+const dragNdrop = new DND(".dragdrop", {
+  actionPath: "heheheh"
+});
