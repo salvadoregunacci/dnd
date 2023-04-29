@@ -1,118 +1,3 @@
-// =========================
-// Variables
-// =========================
-
-const $dnd = document.querySelector('.dnd');
-const $dndWrap = document.querySelector('.dnd__wrap');
-const $dndUploadImg = document.querySelector('.dnd__upload_images');
-const $loadForm = document.getElementById('dnd__form');
-const $submitBtn = document.querySelector('.dnd__submit_btn');
-const $fileInput = document.getElementById('dnd__file_input')
-const _uploadFiles = [];
-
-// =========================
-// Events
-// =========================
-
-if ($submitBtn) {
-  $submitBtn.addEventListener("click", submitForm);
-}
-
-if ($dnd && $dndWrap) {
-  $dndWrap.addEventListener("dragenter", (e) => {
-    e.preventDefault();
-    $dnd.classList.add("active");
-  });
-
-  $dndWrap.addEventListener("dragleave", (e) => {
-    e.preventDefault();
-    $dnd.classList.remove("active");
-  });
-
-  $dndWrap.addEventListener("dragover", (e) => {
-    e.preventDefault();
-  });
-
-  $dndWrap.addEventListener("drop", (e) => {
-    e.preventDefault();
-
-    const _file = e.dataTransfer.files[0];
-    let _fileUrl = "";
-
-    console.log(_file.type);
-
-    if (_file.type.startsWith("image/")) {
-      _fileUrl = URL.createObjectURL(_file);
-
-      const uploadItem = document.createElement("div");
-      uploadItem.classList.add("dnd__upload_img");
-      uploadItem.innerHTML = `
-        <div class="dnd__upload_img">
-            <div class="dnd__upload_img_wrap">
-                <img src="${_fileUrl}" alt="upload image">
-                <button class="dnd__upload_img_delete_btn" title="удалить">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                        <path
-                            d="m432 32h-120l-9.4-18.7a24 24 0 0 0 -21.5-13.3h-114.3a23.72 23.72 0 0 0 -21.4 13.3l-9.4 18.7h-120a16 16 0 0 0 -16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0 -16-16zm-378.8 435a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45l21.2-339h-384z" />
-                    </svg>
-                </button>
-            </div>
-            <div class="dnd__upload_img_title">${_file.name}</div>
-        </div>
-      `;
-
-      if ($dndUploadImg) {
-        $dndUploadImg.append(uploadItem);
-
-        $dnd.classList.remove("active");
-        $dnd.classList.add("complete");
-
-        _uploadFiles.push(_file);
-        $submitBtn.removeAttribute("hidden");
-
-        const deleteBtn = document.querySelector('.dnd__upload_img_delete_btn');
-
-        deleteBtn.addEventListener("click", removeUploadImage);
-      }
-    } else {
-      $dnd.classList.add("err");
-      $dnd.classList.remove("active");
-
-      setTimeout(() => {
-        $dnd.classList.remove("err");
-      }, 3000);
-    }
-  });
-}
-
-// =========================
-// Functions
-// =========================
-
-function removeUploadImage(e) {
-  const curImg = e.target.closest(".dnd__upload_img");
-  curImg.remove();
-  _uploadFiles.pop();
-
-  if ($dndWrap && _uploadFiles.length <= 0 && $submitBtn) {
-    $dndWrap.classList.remove("complete");
-    $submitBtn.setAttribute("hidden", "");
-  }
-}
-
-function submitForm() {
-  const dt = new DataTransfer();
-  dt.items.add(_uploadFiles[0]);
-
-  const fileList = dt.files;
-
-  if ($fileInput) {
-    $fileInput.files = fileList;
-  }
-
-  $loadForm.submit();
-}
-
 // ===============================================
 // ===============================================
 // ===============================================
@@ -125,10 +10,12 @@ class DND {
 
     this._uploadFiles = [];
     this.dom = {
-      $dnd: null,
-      $dndWrap: null,
-      $dndUploadImg: null,
-      $loadForm: null,
+      $el: null,
+      $elWrap: null,
+      $elInnerTitle: null,
+      $elAlert: null,
+      $loadedImagesWrap: null,
+      $submitForm: null,
       $submitBtn: null,
       $fileInput: null,
     };
@@ -143,16 +30,23 @@ class DND {
     this._options = {
       actionPath: options.actionPath || "#",
       multiple: options.multiple || false,
-      validTypes: options.validTypes || "*",
+      allowedTypes: options.allowedTypes || "*",
       uiStyle: options.uiStyle || "default"
     };
 
     this.__ = {
       btnSaveTxt: "Сохранить",
-      defaultTitle: "Перетащите файлы сюда",
-      dropTitle: "Отпустите файл",
+      title: {
+        default: "Перетащите файлы сюда",
+        drop: "Отпустите файл",
+      },
       alertTxt: {
-        onlyPhoto: "Можно загрузить только фото!"
+        onlyPhoto: "Можно загрузить только фото"
+      },
+      err: {
+        default: "Произошла ошибка",
+        fileTypeNotAllowed: "Выберите фото",
+        fileTypeNotSupported: `Формат файла не подходит, только: "${Array.from(this._options.allowedTypes).join(",")}"`
       }
     };
 
@@ -183,43 +77,56 @@ class DND {
 
 
   _addEventHandlers() {
-    this.dom.$dndWrap.addEventListener("dragenter", this._eHandlers.dragenter);
-    this.dom.$dndWrap.addEventListener("dragleaver", this._eHandlers.dragleave);
-    this.dom.$dndWrap.addEventListener("dragover", this._eHandlers.dragover);
-    this.dom.$dndWrap.addEventListener("drop", this._eHandlers.drop);
+    this.dom.$elWrap.addEventListener("dragenter", this._eHandlers.dragenter);
+    this.dom.$elWrap.addEventListener("dragleave", this._eHandlers.dragleave);
+    this.dom.$elWrap.addEventListener("dragover", this._eHandlers.dragover);
+    this.dom.$elWrap.addEventListener("drop", this._eHandlers.drop);
   }
 
-  // event handlers
+  // event handlers  ======
+
+  // enter
   _dragEnterHandler(e) {
     e.preventDefault();
-    console.log(this);
-    this.dom.$dnd.classList.add("active");
-    // console.log("enter");
+    this._changeState("active");
   }
 
+  // leave
   _dragLeaveHandler(e) {
     e.preventDefault();
-    this.dom.$dnd.classList.remove("active");
-    // console.log("leave");
+    this._changeState("default");
   }
 
+  // over
   _dragOverHandler(e) {
     e.preventDefault();
-    // console.log("over");
   }
 
+  // drop
   _dragDropHandler(e) {
     e.preventDefault();
-    // console.log("drop");
+
+    const _file = e.dataTransfer.files[0];
+
+    const _resultCheckFile = this._checkAllowedFile(_file);
+
+    if (_resultCheckFile.status) {
+      console.log("все ок");
+    } else {
+      this._showAlert(_resultCheckFile.errMsg || this.__.err.default, _resultCheckFile.errType);
+      this._changeState("default");
+    }
   }
-  // # event handlers
+  // # event handlers ======
 
 
   _initToDOM() {
-    this.dom.$dnd = this._wrap.querySelector('.dnd');
-    this.dom.$dndWrap = this._wrap.querySelector('.dnd__wrap');
-    this.dom.$dndUploadImg = this._wrap.querySelector('.dnd__upload_images');
-    this.dom.$loadForm = this._wrap.querySelector('.dnd__form');
+    this.dom.$el = this._wrap.querySelector('.dnd');
+    this.dom.$elWrap = this._wrap.querySelector('.dnd__wrap');
+    this.dom.$elInnerTitle = this._wrap.querySelector('.dnd__title');
+    this.dom.$elAlert = this._wrap.querySelector('.dnd__alert');
+    this.dom.$loadedImagesWrap = this._wrap.querySelector('.dnd__upload_images');
+    this.dom.$submitForm = this._wrap.querySelector('.dnd__form');
     this.dom.$submitBtn = this._wrap.querySelector('.dnd__submit_btn');
     this.dom.$fileInput = this._wrap.querySelector('.dnd__file_input');
 
@@ -233,13 +140,39 @@ class DND {
   }
 
 
+  _checkAllowedFile(file) {
+    try {
+      if (file instanceof File) {
+
+        if (typeof (this._options.allowedTypes) === "string") {
+          if (this._options.allowedTypes === "*" && file.type.startsWith("image/")) {
+            return { status: true };
+          }
+
+          return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
+        } else if (Array.isArray(this._options.allowedTypes)) {
+
+          if (!file.type.startsWith("image/")) return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
+
+          const _type = file.type.replace(/^image\//, "");
+          return this._options.allowedTypes.includes(_type) ? { status: true } : { errType: "warning", errMsg: this.__.err.fileTypeNotSupported, status: false };
+        }
+
+      } else {
+        throw new Error("uploaded object is not a file");
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
+
+
   _getHtml() {
     return `
     <div class="dnd" data-ui-style="${this._options.uiStyle}">
       <div class="dnd__wrap">
-          <span class="dnd__title dnd__title_enter">${this.__.defaultTitle}</span>
-          <span class="dnd__title dnd__title_drop">${this.__.dropTitle}</span>
-          <div class="dnd__alert">${this.__.alertTxt.onlyPhoto}</div>
+          <span class="dnd__title">${this.__.title.default}</span>
+          <div class="dnd__alert" data-type="warning">${this.__.alertTxt.onlyPhoto}</div>
 
           <div class="dnd__upload_images"></div>
       </div>
@@ -252,9 +185,38 @@ class DND {
     </div>
     `;
   }
+
+
+  // helpers   =========
+  _changeTitle(newTxt = this.__.title.default) {
+    this.dom.$elInnerTitle.textContent = newTxt;
+  }
+
+  _showAlert(msg = "", type = "warning", timeToShow = 3000) {
+    this.dom.$elAlert.textContent = msg;
+    this.dom.$elAlert.setAttribute("data-type", type);
+    this.dom.$elAlert.style.display = "block";
+
+    setTimeout(() => this.dom.$elAlert.style.display = "none", timeToShow);
+  }
+
+  _changeState(state) {
+    switch (state) {
+      case "active":
+        this._changeTitle(this.__.title.drop);
+        this.dom.$el.classList.add("active");
+        break;
+      case "default":
+      default:
+        this._changeTitle(this.__.title.default);
+        this.dom.$el.classList.remove("active");
+    }
+  }
+  // #helpers  =========
 }
 
 
 const dragNdrop = new DND(".dragdrop", {
-  actionPath: "heheheh"
+  actionPath: "heheheh",
+  allowedTypes: ["png", "webp"]
 });

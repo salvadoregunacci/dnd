@@ -14,13 +14,8 @@
     transition: .4s;
   }
 
-  .dnd__title_enter {
+  .dnd__title {
     color: #9c9c9c;
-  }
-
-  .dnd__title_drop {
-    color: #9c9c9c;
-    display: none;
   }
 
   .dnd__title {
@@ -108,25 +103,27 @@
   position: absolute;
   top: 10px;
   right: 10px;
+  padding: 3px 10px;
+  display: none;
+  font-size: 14px;
+}
+
+.dnd__alert[data-type="warning"] {
   background: #f3f736;
   border: 1px solid #cbce26;
   color: #6f700e;
-  padding: 3px 10px;
-  display: none;
+}
+
+.dnd__alert[data-type="danger"] {
+  background: rgb(238, 70, 70);
+  color: #fff;
+  border: none;
 }
 
 .dnd.active {
   .dnd__wrap {
     background: #ceebce;
     border: 2px dashed rgb(64, 136, 64);
-  }
-
-  .dnd__title_enter {
-    display: none;
-  }
-
-  .dnd__title_drop {
-    display: inline-block;
   }
 }
 
@@ -135,11 +132,5 @@
 
   .dnd__title {
     display: none;
-  }
-}
-
-.dnd.err {
-  .dnd__alert {
-    display: block;
   }
 }
