@@ -1,0 +1,135 @@
+.dnd {
+  width: 450px;
+  height: 200px;
+  background: #eeeeee;
+  border: 2px dashed #afafaf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: .4s;
+  position: relative;
+
+  &__title_enter {
+    color: #9c9c9c;
+  }
+
+  &__title_drop {
+    color: #9c9c9c;
+    display: none;
+  }
+
+  &__title {
+    pointer-events: none;
+  }
+
+  &.active {
+    background: #ceebce;
+    border: 2px dashed rgb(64, 136, 64);
+
+    .dnd__title_enter {
+      display: none;
+    }
+
+    .dnd__title_drop {
+      display: inline-block;
+    }
+  }
+
+  &.complete {
+    cursor: default;
+
+    .dnd__title {
+      display: none;
+    }
+  }
+
+  &.err {
+    .dnd__alert {
+      display: block;
+    }
+  }
+}
+
+.dnd__upload_images {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.dnd__upload_img {
+  display: flex;
+  flex-direction: column;
+}
+
+.dnd__upload_img_wrap {
+  max-width: 120px;
+  height: 80px;
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    .dnd__upload_img_delete_btn {
+      display: block;
+    }
+  }
+
+  img {
+    width: 100%;
+    object-fit: contain;
+  }
+}
+
+.dnd__upload_img_title {
+  font-size: 12px;
+}
+
+.dnd__upload_img_delete_btn {
+  background: none;
+  border: none;
+  display: none;
+}
+
+.dnd__upload_img_delete_btn svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  filter: drop-shadow(0 0 10px rgba(0,0,0, 1));
+  transition: .3s;
+  width: 25px;
+
+  path {
+    fill : rgb(248, 23, 23);
+  }
+
+  &:hover path{
+    fill: rgb(197, 41, 41);
+  }
+}
+
+.dnd__submit_btn {
+  margin-top: 10px;
+  background: rgb(24, 158, 24);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 10px;
+  transition: .3s;
+
+  &:hover{
+    background: rgb(21, 139, 21);
+  }
+}
+
+.dnd__alert {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f3f736;
+  border: 1px solid #cbce26;
+  color: #6f700e;
+  padding: 3px 10px;
+  display: none;
+}

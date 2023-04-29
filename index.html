@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="./css/normalize.min.css">
+    <link rel="stylesheet" href="./css/fonts.css">
+    <link rel="stylesheet" href="./css/style.min.css">
+
+    <title>Drag and Drop</title>
+</head>
+
+<body style="padding: 30px;">
+    <div class="dnd_wrap">
+        <div class="dnd">
+            <span class="dnd__title dnd__title_enter">Перетащите файлы сюда</span>
+            <span class="dnd__title dnd__title_drop">Отпустите файл</span>
+
+            <div class="dnd__upload_images"></div>
+            <div class="dnd__alert">Можно загрузить только фото!</div>
+        </div>
+
+        <button hidden class="dnd__submit_btn">Сохранить</button>
+
+        <form hidden id="dnd__form" action="#compl" method="POST" enctype="multipart/form-data">
+            <input type="file" name="img" id="dnd__file_input">
+        </form>
+    </div>
+
+
+    <!-- ================================================ -->
+    <script src="./scripts/bootstrap.bundle.min.js"></script>
+    <script src="./scripts/swiper-bundle.min.js"></script>
+    <script src="./scripts/script.js"></script>
+</body>
+
+</html>
