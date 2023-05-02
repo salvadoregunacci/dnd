@@ -34,6 +34,15 @@
   --submit_btn_bg_h: #3c8a18;
 
   --upload_img_text: #b6b6b6;
+
+  ::-webkit-scrollbar {
+    background-color: rgb(107, 107, 107);
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d4d4d4;
+  }
 }
 
 // ============================

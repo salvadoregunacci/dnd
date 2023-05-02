@@ -5,8 +5,6 @@ class DND {
     this.id = ++DND._id;
     this._uploadFiles = [];
 
-    console.log(this.id);
-
     this.dom = {
       $el: null,
       $elWrap: null,
@@ -34,10 +32,14 @@ class DND {
     this._options = {
       actionPath: options.actionPath || "#",
       multiple: options.multiple || false,
-      maxSize: options.maxSize || 1,
+      maxFiles: options.maxFiles || 1,
       allowedTypes: options.allowedTypes || "*",
       theme: options.theme || "default"
     };
+
+    if ("bannedTypes" in options) {
+      this._options.bannedTypes = options.bannedTypes;
+    }
 
     this._addActionPath(createWrap);
 
@@ -55,7 +57,8 @@ class DND {
         default: "Произошла ошибка",
         fileTypeNotAllowed: "Можно загрузить только фото",
         fileTypeNotSupported: `Доступные форматы: "${Array.from(this._options.allowedTypes).join(", ")}"`,
-        maxFiles: "Максимальное к-во элементов: " + this._options.maxSize,
+        thisFileTypeNotSupported: "Этот формат не допустим",
+        maxFiles: "Максимальное к-во элементов: " + this._options.maxFiles,
         dublicateFile: "Файл уже загружен"
       }
     };
@@ -360,7 +363,7 @@ class DND {
     }
 
     while (true) {
-      if (this._uploadFiles.length <= this._options.maxSize) {
+      if (this._uploadFiles.length <= this._options.maxFiles) {
         break;
       }
 
@@ -373,6 +376,17 @@ class DND {
   _checkAllowedFile(file) {
     try {
       if (file instanceof File) {
+        if ("bannedTypes" in this._options) {
+          if (this._options.onlyPhoto && !file.type.startsWith("image/")) return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
+
+          const _type = file.type.replace(/^image\//, "");
+
+          if (typeof this._options.bannedTypes == "string") {
+            if (_type == this._options.bannedTypes) return { errType: "warning", errMsg: this.__.err.thisFileTypeNotSupported, status: false }
+          } else if(Array.isArray(this._options.bannedTypes) && this._options.bannedTypes.includes(_type)) {
+            return { errType: "warning", errMsg: this.__.err.thisFileTypeNotSupported, status: false };
+          }
+        }
 
         if (typeof (this._options.allowedTypes) === "string") {
           if (this._options.allowedTypes === "*" && file.type.startsWith("image/")) {
@@ -382,12 +396,12 @@ class DND {
           return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
         } else if (Array.isArray(this._options.allowedTypes)) {
 
-          if (!file.type.startsWith("image/")) return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
+          if (this._options.onlyPhoto && !file.type.startsWith("image/")) return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
 
           const _type = file.type.replace(/^image\//, "");
+
           return this._options.allowedTypes.includes(_type) ? { status: true } : { errType: "warning", errMsg: this.__.err.fileTypeNotSupported, status: false };
         }
-
       } else {
         throw new Error("uploaded object is not a file");
       }
@@ -496,7 +510,7 @@ class DND {
       this.changeState("filled");
       this.showSubmitBtn();
 
-      if (this._options.multiple && this._uploadFiles.length < this._options.maxSize) {
+      if (this._options.multiple && this._uploadFiles.length < this._options.maxFiles) {
         this.dom.$elLoadInputWrap.classList.add("compact");
         this.dom.$elLoadInputWrap.removeAttribute("hidden");
       } else {
@@ -515,8 +529,10 @@ class DND {
 
 
 const dragNdrop = new DND("#dragdrop", {
-  allowedTypes: ["jpg", "jpeg", "png"],
+  theme: "light",
+  onlyPhoto: false,
+  bannedTypes: ["png"],
   multiple: true,
-  maxSize: 2
+  maxFiles: 8
 });
 
