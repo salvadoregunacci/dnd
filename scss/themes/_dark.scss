@@ -1,0 +1,39 @@
+// ============================
+// DARK THEME
+.dnd[data-theme="dark"] {
+  // colors:
+  --green: #51cf17;
+  --green_active: #49b914;
+
+  // elements
+  --dropzone_bg: #9c9c9c1e;
+  --dropzone_bg_h: #5edf5e1f;
+  --dropzone_border: #777777;
+  --dropzone_border_a: rgb(64, 136, 64);
+  --dropzone_title_text: #9c9c9c;
+  --dropzone_icon: #8d8d8d;
+
+  --load_btn_full: #eeeeee;
+  --load_btn_full_h: #cfcfcf;
+  --load_btn_full_border: #c9c9c9;
+  --load_btn_full_text: #2c2c2c;
+  --load_btn_compact_bg: #414141;
+  --load_btn_compact: var(--green);
+  --load_btn_compact_h: var(--green_active);
+
+  --alert_warning_bg: #f3f736;
+  --alert_warning_border: #dee033;
+  --alert_warning_text: #6f700e;
+
+  --alert_danger_bg: rgb(238, 70, 70);
+  --alert_danger_border: transparent;
+  --alert_danger_text: #fff;
+
+  --submit_btn_text: #fff;
+  --submit_btn_bg: #42a812;
+  --submit_btn_bg_h: #3c8a18;
+
+  --upload_img_text: #b6b6b6;
+}
+
+// ============================

@@ -1,26 +1,157 @@
+// ============================
+// DEFAULT THEME
+
 .dnd {
-  width: 450px;
-  height: 200px;
+  font-family: "Montserrat", sans-serif;
+  max-width: 420px;
 
-  .dnd__wrap {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #eeeeee;
-    border: 2px dashed #afafaf;
-    transition: .4s;
+  // colors:
+  --green: #51cf17;
+  --green_active: #49b914;
+
+  // elements
+  --dropzone_bg: #9c9c9c1e;
+  --dropzone_bg_h: #5edf5e44;
+  --dropzone_border: #c4c4c4;
+  --dropzone_border_a: rgb(64, 136, 64);
+  --dropzone_title_text: #9c9c9c;
+  --dropzone_icon: #c2c2c2;
+
+  --load_btn_full: #fff;
+  --load_btn_full_h: #eeeeee;
+  --load_btn_full_border: #d6d6d6;
+  --load_btn_full_text: #3f3f3f;
+  --load_btn_compact_bg: #f1f1f1;
+  --load_btn_compact: var(--green);
+  --load_btn_compact_h: var(--green_active);
+
+  --alert_warning_bg: #f3f736;
+  --alert_warning_border: #dee033;
+  --alert_warning_text: #6f700e;
+
+  --alert_danger_bg: rgb(238, 70, 70);
+  --alert_danger_border: transparent;
+  --alert_danger_text: #fff;
+
+  --submit_btn_text: #fff;
+  --submit_btn_bg: var(--green);
+  --submit_btn_bg_h: var(--green_active);
+
+  --upload_img_text: #1a1a1a;
+}
+
+// ============================
+
+.dnd__wrap {
+  width: 100%;
+  min-height: 200px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--dropzone_border);
+  transition: .4s;
+  background: var(--dropzone_bg);
+}
+
+.dnd__title {
+  color: var(--dropzone_title_text);
+  margin-top: 6px;
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.dnd__offer span {
+  color: var(--dropzone_title_text);
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.dnd__offer_icon {
+  pointer-events: none;
+  width: 45px;
+
+  path {
+    fill: var(--dropzone_icon);
+  }
+}
+
+.dnd__offer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.dnd__file_wrap.compact {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  background: var(--load_btn_compact_bg);
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .dnd__file_label {
+    padding: 0;
+    background: none;
+    border: none;
+    box-sizing: border-box;
+    margin-top: 0;
+
+    span {
+      display: none;
+    }
+
+    .dnd__file_label_icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &:hover {
+      .dnd__file_label_icon path {
+        fill: var(--load_btn_compact_h);
+      }
+    }
   }
 
-  .dnd__title {
-    color: #9c9c9c;
-  }
+  .dnd__file_label_icon {
+    display: inline-block;
 
-  .dnd__title {
-    pointer-events: none;
+    path {
+      fill: var(--load_btn_compact);
+      transition: .2s;
+    }
   }
+}
+
+.dnd__file_label {
+  background: var(--load_btn_full);
+  padding: 5px 10px;
+  border: 1px solid var(--load_btn_full_border);
+  color: var(--load_btn_full_text);
+  transition: .3s;
+  cursor: pointer;
+  box-sizing: border-box;
+  display: inline-block;
+  margin-top: 8px;
+
+  &:hover {
+    background: var(--load_btn_full_h);
+  }
+}
+
+.dnd__file_label_icon {
+  width: 40px;
+  height: 40px;
+  display: none;
 }
 
 .dnd__upload_images {
@@ -30,33 +161,45 @@
   display: flex;
   column-gap: 8px;
   flex-wrap: wrap;
+  overflow-y: auto;
+  height: 90%;
 }
 
 .dnd__upload_img {
   display: flex;
   flex-direction: column;
+  max-width: 30%;
 }
 
 .dnd__upload_img_wrap {
-  max-width: 120px;
-  height: 80px;
+  aspect-ratio: 16/9;
+  width: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    object-fit: contain;
+  }
 
   &:hover {
     .dnd__upload_img_delete_btn {
       display: block;
     }
   }
-
-  img {
-    width: 100%;
-    object-fit: contain;
-  }
 }
 
 .dnd__upload_img_title {
+  margin-top: 3px;
   font-size: 12px;
+  max-width: 100%;
+  max-height: 14px;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--upload_img_text);
 }
 
 .dnd__upload_img_delete_btn {
@@ -64,6 +207,9 @@
   border: none;
   display: none;
   cursor: pointer;
+  position: absolute;
+  top: 50%;
+  left: 50%;
 }
 
 .dnd__upload_img_delete_btn svg {
@@ -73,7 +219,7 @@
   transform: translate(-50%, -50%);
   font-size: 24px;
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, .5));
-  width: 25px;
+  width: 20px;
 
   path {
     fill: rgb(248, 23, 23);
@@ -87,15 +233,15 @@
 
 .dnd__submit_btn {
   margin-top: 10px;
-  background: rgb(24, 158, 24);
-  color: #fff;
+  background: var(--submit_btn_bg);
+  color: var(--submit_btn_text);
   border: none;
-  border-radius: 3px;
-  padding: 3px 10px;
+  padding: 6px 10px;
   transition: .3s;
+  cursor: pointer;
 
   &:hover {
-    background: rgb(21, 139, 21);
+    background: var(--submit_btn_bg_h);
   }
 }
 
@@ -111,31 +257,84 @@
 .dnd__alert {
   padding: 3px 10px;
   font-size: 14px;
+  z-index: 2;
 }
 
 .dnd__alert[data-type="warning"] {
-  background: #f3f736;
-  border: 1px solid #cbce26;
-  color: #6f700e;
+  background: var(--alert_warning_bg);
+  border: 1px solid var(--alert_warning_border);
+  color: var(--alert_warning_text);
 }
 
 .dnd__alert[data-type="danger"] {
   background: rgb(238, 70, 70);
-  color: #fff;
+  color: var(--alert_danger_text);
   border: none;
 }
 
+.dnd__offer,
+.dnd__offer_icon,
+.dnd__title {
+  pointer-events: none;
+}
+
 .dnd.active {
-  .dnd__wrap {
-    background: #ceebce;
-    border: 2px dashed rgb(64, 136, 64);
+  .dnd__offer span {
+    display: none;
+  }
+
+  .dnd__file_wrap {
+    pointer-events: none;
+    display: none;
+
+    .dnd__file,
+    .dnd__file_label {
+      pointer-events: none;
+    }
   }
 }
 
-.dnd.complete {
-  cursor: default;
+.dnd.filled {
+  .dnd__offer {
+    display: none;
+  }
+}
+
+.dnd.over {
+  .dnd__wrap {
+    background: var(--dropzone_bg_h);
+    border: 2px dashed var(--dropzone_border_a);
+  }
+
+  .dnd__file_wrap {
+    pointer-events: none;
+    display: none;
+  }
+}
+
+.dnd.filled.over {
+  .dnd__offer {
+    display: flex;
+    position: absolute;
+    right: 10px;
+    bottom: 5px;
+    flex-direction: row;
+    column-gap: 5px;
+
+    .dnd__offer_icon {
+      width: 25px;
+    }
+
+    span {
+      display: none;
+    }
+  }
 
   .dnd__title {
-    display: none;
+    display: block;
+  }
+
+  .dnd__upload_img {
+    pointer-events: none;
   }
 }

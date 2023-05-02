@@ -1,13 +1,19 @@
 class DND {
-  constructor(createWrap = ".dnd_el", options) {
+  static _id = 0;
 
+  constructor(createWrap = ".dnd_el", options) {
+    this.id = ++DND._id;
     this._uploadFiles = [];
+
+    console.log(this.id);
 
     this.dom = {
       $el: null,
       $elWrap: null,
       $elInnerTitle: null,
       $elAlertsWrap: null,
+      $elLoadInput: null,
+      $elLoadInputWrap: null,
       $loadedImagesWrap: null,
       $submitForm: null,
       $submitBtn: null,
@@ -16,10 +22,13 @@ class DND {
     };
 
     this._eHandlers = {
+      deleteFile: this._deleteFileHandler.bind(this),
       dragenter: this._dragEnterHandler.bind(this),
       dragleave: this._dragLeaveHandler.bind(this),
       dragover: this._dragOverHandler.bind(this),
-      drop: this._dragDropHandler.bind(this)
+      drop: this._dragDropHandler.bind(this),
+      loadFile: this._loadInputHandler.bind(this),
+      submitForm: this._toSubmitFormHandler.bind(this)
     };
 
     this._options = {
@@ -27,22 +36,25 @@ class DND {
       multiple: options.multiple || false,
       maxSize: options.maxSize || 1,
       allowedTypes: options.allowedTypes || "*",
-      uiStyle: options.uiStyle || "default"
+      theme: options.theme || "default"
     };
 
+    this._addActionPath(createWrap);
+
     this.__ = {
-      btnSaveTxt: "Сохранить",
+      saveBtnTxt: "Сохранить",
+      loadBtnTxt: `Выберите файл${this._options.multiple ? "ы" : ""}`,
       title: {
-        default: "Перетащите файлы сюда",
+        default:  `Перетащите файл${this._options.multiple ? "ы" : ""} сюда`,
         drop: "Отпустите файл",
       },
       alertTxt: {
-        selectPhoto: "Выберите фото"
+        selectPhoto: "Выберите файлы для загрузки"
       },
       err: {
         default: "Произошла ошибка",
         fileTypeNotAllowed: "Можно загрузить только фото",
-        fileTypeNotSupported: `Формат файла не подходит, только: "${Array.from(this._options.allowedTypes).join(", ")}"`,
+        fileTypeNotSupported: `Доступные форматы: "${Array.from(this._options.allowedTypes).join(", ")}"`,
         maxFiles: "Максимальное к-во элементов: " + this._options.maxSize,
         dublicateFile: "Файл уже загружен"
       }
@@ -67,6 +79,43 @@ class DND {
     } catch (err) {
       console.error(err.message);
     }
+  }
+
+
+  _addActionPath(createWrap) {
+    try {
+      const $createWrap = document.querySelector(createWrap);
+
+      if (!$createWrap) {
+        throw new Error("Container element not found");
+      }
+
+      if ($createWrap.hasAttribute("data-action-path")) {
+        this._options.actionPath = $createWrap.getAttribute("data-action-path");
+        $createWrap.removeAttribute("data-action-path");
+      }
+    } catch(err) {
+      console.error(err.message)
+    }
+  }
+
+
+  _toSubmitFormHandler() {
+    if (this._uploadFiles.length <= 0) {
+      this.showAlert(this.__.alertTxt.selectPhoto);
+      return;
+    }
+
+    const dt = new DataTransfer();
+    let fileList;
+
+    for (const file of this._uploadFiles) {
+      dt.items.add(file);
+    }
+
+    fileList = dt.files;
+    this.dom.$fileInput.files = fileList;
+    this.dom.$submitForm.submit();
   }
 
 
@@ -97,10 +146,37 @@ class DND {
     this.dom.$elWrap.addEventListener("dragenter", this._eHandlers.dragenter);
     this.dom.$elWrap.addEventListener("dragleave", this._eHandlers.dragleave);
     this.dom.$elWrap.addEventListener("dragover", this._eHandlers.dragover);
+    this.dom.$elLoadInput.addEventListener("change", this._eHandlers.loadFile);
+    this.dom.$submitBtn.addEventListener("click", this._eHandlers.submitForm);
     this.dom.$elWrap.addEventListener("drop", this._eHandlers.drop);
   }
 
   // event handlers  ======
+
+  // load input file
+  _loadInputHandler(e) {
+    this._loadNewFile(e.target.files);
+    this.dom.$elLoadInput.value = "";
+  }
+
+  // delete file
+  _deleteFileHandler(e) {
+    const dummy = {};
+    const eT = e.target;
+    const deletePreview = eT.closest(".dnd__upload_img");
+
+    if (!deletePreview) return;
+
+    let deleteFileName = (deletePreview.querySelector(".dnd__upload_img_title") || dummy).textContent;
+    deleteFileName = deleteFileName ? deleteFileName.trim() : "";
+
+    const deleteElemIndex = this._uploadFiles.findIndex(item => item.name == deleteFileName);
+
+    this._uploadFiles.splice(deleteElemIndex, 1);
+    deletePreview.remove();
+
+    this.checkEmptyDND();
+  }
 
   // enter
   _dragEnterHandler(e) {
@@ -112,33 +188,44 @@ class DND {
   _dragLeaveHandler(e) {
     e.preventDefault();
     this.changeState("default");
+    this.checkEmptyDND();
   }
 
   // over
   _dragOverHandler(e) {
     e.preventDefault();
+    this.changeState("over");
   }
 
   // drop
   _dragDropHandler(e) {
     e.preventDefault();
-    const _files = e.dataTransfer.files;
+
+    this._loadNewFile(e.dataTransfer.files);
+  }
+  // # event handlers ======
+
+
+  _loadNewFile(_files) {
+    this.changeState("default");
 
     this._allowedFilter(_files);
     this._multipleValidate();
     this._removeDublicateFile();
     this._moveFilesToPreview();
+
+    this.checkEmptyDND();
   }
-  // # event handlers ======
 
 
   _removeDublicateFile() {
+    const dummy = {};
     const availablePreviews = document.querySelectorAll('.dnd__upload_img');
 
     if (this._uploadFiles.length <= 0) return false;
 
     this._uploadFiles = this._uploadFiles.filter((obj, index, arr) => {
-      if (arr.findIndex((o) => o.name === obj.name) === index) {
+      if (arr.findIndex((o) => (o || dummy).name === (obj || dummy).name) === index) {
         const removeEl = Array.from(availablePreviews).find(item => {
           const prevTitle = item.querySelector('.dnd__upload_img_title').textContent.trim();
 
@@ -149,7 +236,7 @@ class DND {
           return false;
         });
 
-        if(removeEl) removeEl.remove();
+        if (removeEl) removeEl.remove();
 
         return true;
       }
@@ -162,15 +249,35 @@ class DND {
 
   _moveFilesToPreview() {
     if (this._uploadFiles.length > 0) {
-      for (const file of this._uploadFiles) {
+
+      for (let index = 0; index < this._uploadFiles.length; index++) {
+        const file = this._uploadFiles[index];
+
+        if (!file) {
+          this._uploadFiles.splice(index, 1);
+          return;
+        }
+
         const previewEl = this._getUploadImg(file);
+        this._addDeleteBtnHandler(previewEl);
         this.dom.$loadedImagesWrap.append(previewEl);
       }
     }
   }
 
 
+  _addDeleteBtnHandler(el) {
+    if (el) {
+      const $deleteBtn = el.querySelector(".dnd__upload_img_delete_btn");
+
+      $deleteBtn.addEventListener("click", this._eHandlers.deleteFile);
+    }
+  }
+
+
   _getUploadImg(file) {
+    if (!(file instanceof File)) return;
+
     const fileUrl = URL.createObjectURL(file);
     const newUploadItem = document.createElement("div");
 
@@ -212,7 +319,6 @@ class DND {
       return true;
     } else {
       this.showAlert(_resultCheckFile.errMsg || this.__.err.default, _resultCheckFile.errType);
-      this.changeState("default");
       return false;
     }
   }
@@ -221,6 +327,8 @@ class DND {
   _initDOMelements() {
     this.dom.$el = this.dom.$container.querySelector('.dnd');
     this.dom.$elWrap = this.dom.$container.querySelector('.dnd__wrap');
+    this.dom.$elLoadInput = this.dom.$container.querySelector(".dnd__file");
+    this.dom.$elLoadInputWrap = this.dom.$container.querySelector(".dnd__file_wrap");
     this.dom.$elInnerTitle = this.dom.$container.querySelector('.dnd__title');
     this.dom.$elAlertsWrap = this.dom.$container.querySelector('.dnd__alerts_wrap');
     this.dom.$loadedImagesWrap = this.dom.$container.querySelector('.dnd__upload_images');
@@ -240,8 +348,14 @@ class DND {
 
   _multipleValidate() {
     if (!this._options.multiple) {
+      const availablePreviews = document.querySelectorAll('.dnd__upload_img');
       const _lastEl = this._uploadFiles[this._uploadFiles.length - 1];
       this._uploadFiles = [_lastEl];
+
+      if (availablePreviews && availablePreviews.length > 0) {
+        availablePreviews.forEach(item => item.remove());
+      }
+
       return;
     }
 
@@ -251,7 +365,7 @@ class DND {
       }
 
       this.showAlert(this.__.err.maxFiles);
-      this._uploadFiles.shift();
+      this._uploadFiles.pop();
     }
   }
 
@@ -285,22 +399,41 @@ class DND {
 
   _getHtml() {
     return `
-    <div class="dnd" data-ui-style="${this._options.uiStyle}">
-      <div class="dnd__wrap">
-          <span class="dnd__title">${this.__.title.default}</span>
-          <div class="dnd__alerts_wrap"></div>
+    <div class="dnd" data-theme="${this._options.theme}">
+        <div class="dnd__wrap">
+            <div class="dnd__offer">
+                <svg class="dnd__offer_icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                        d="m21 16c.5128358 0 .9355072.3860402.9932723.8833789l.0067277.1166211v2c0 1.5976809-1.24892 2.9036609-2.8237272 2.9949073l-.1762728.0050927h-14c-1.59768088 0-2.90366088-1.24892-2.99490731-2.8237272l-.00509269-.1762728v-2c0-.5522847.44771525-1 1-1 .51283584 0 .93550716.3860402.99327227.8833789l.00672773.1166211v2c0 .5128358.38604019.9355072.88337887.9932723l.11662113.0067277h14c.5128358 0 .9355072-.3860402.9932723-.8833789l.0067277-.1166211v-2c0-.5522847.4477153-1 1-1zm-9-14c.5522847 0 1 .44771525 1 1v9.585l1.2928932-1.2921068c.360484-.3604839.927715-.3882135 1.3200062-.0831886l.0942074.0831886c.3604839.360484.3882135.927715.0831886 1.3200062l-.0831886.0942074-3 3-.0439598.0413974-.0678404.0551612-.1112445.0716634-.1127261.0534457-.105343.0353804-.1485188.0290109-.1174742.0068342-.0752385-.0027879-.1254873-.0174522-.1114167-.029498-.111079-.0439353-.0974873-.0523221-.0960413-.0667905c-.0317158-.0248828-.0618904-.0516409-.0903567-.0801072l-2.99999998-3c-.39052429-.3905243-.39052429-1.0236893 0-1.4142136.36048396-.3604839.92771502-.3882135 1.32000622-.0831886l.09420734.0831886 1.29289322 1.2921068v-9.585c0-.55228475.4477153-1 1-1z"
+                        fill-rule="evenodd" />
+                </svg>
+                <div class="dnd__title">${this.__.title.default}</div>
+                <span>или</span>
+            </div>
+            <div class="dnd__file_wrap">
+              <label for="dnd__file_${this.id}" class="dnd__file_label">
+                <svg class="dnd__file_label_icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 48 48" ><g clip-rule="evenodd" fill="#333" fill-rule="evenodd"><path d="m24 42c9.9411 0 18-8.0589 18-18s-8.0589-18-18-18-18 8.0589-18 18 8.0589 18 18 18zm0 2c11.0457 0 20-8.9543 20-20s-8.9543-20-20-20-20 8.9543-20 20 8.9543 20 20 20z"/><path d="m13 24c0-.5523.4477-1 1-1h20c.5523 0 1 .4477 1 1s-.4477 1-1 1h-20c-.5523 0-1-.4477-1-1z"/><path d="m24 13c.5523 0 1 .4477 1 1v20c0 .5523-.4477 1-1 1s-1-.4477-1-1v-20c0-.5523.4477-1 1-1z"/></g></svg>
+                <span>${this.__.loadBtnTxt}</span>
+              </label>
+              <input class="dnd__file" hidden type="file" id="dnd__file_${this.id}" accept="image/*" ${this._options.multiple ? "multiple" : ""} />
+            </div>
 
-          <div class="dnd__upload_images"></div>
-      </div>
+            <div class="dnd__alerts_wrap">
 
-      <button hidden class="dnd__submit_btn">${this.__.btnSaveTxt}</button>
+            </div>
+            <div class="dnd__upload_images"></div>
+        </div>
 
-      <form hidden class="dnd__form" action="${this._options.actionPath}" method="POST" enctype="multipart/form-data">
-          <input type="file" name="img" class="dnd__file_input">
-      </form>
+        <button hidden class="dnd__submit_btn">${this.__.saveBtnTxt}</button>
+
+        <form hidden class="dnd__form" action="${this._options.actionPath}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="images[]" class="dnd__file_input" ${this._options.multiple ? "multiple" : ""} />
+        </form>
     </div>
     `;
   }
+
+  // <div class="dnd__alert" data-type="warning">Simple alert</div>
 
 
   // helpers   =========
@@ -334,10 +467,47 @@ class DND {
         this.changeTitle(this.__.title.drop);
         this.dom.$el.classList.add("active");
         break;
+      case "filled":
+        this.dom.$el.classList.add("filled");
+        break;
+      case "over":
+        this.changeTitle(this.__.title.drop);
+        this.dom.$el.classList.add("over");
+        break;
       case "default":
       default:
         this.changeTitle(this.__.title.default);
         this.dom.$el.classList.remove("active");
+        this.dom.$el.classList.remove("filled");
+        this.dom.$el.classList.remove("over");
+    }
+  }
+
+  showSubmitBtn() {
+    this.dom.$submitBtn.removeAttribute("hidden");
+  }
+
+  hiddenSubmitBtn() {
+    this.dom.$submitBtn.setAttribute("hidden", "");
+  }
+
+  checkEmptyDND() {
+    if (this._uploadFiles.length > 0) {
+      this.changeState("filled");
+      this.showSubmitBtn();
+
+      if (this._options.multiple && this._uploadFiles.length < this._options.maxSize) {
+        this.dom.$elLoadInputWrap.classList.add("compact");
+        this.dom.$elLoadInputWrap.removeAttribute("hidden");
+      } else {
+        this.dom.$elLoadInputWrap.classList.remove("compact");
+        this.dom.$elLoadInputWrap.setAttribute("hidden", "");
+      }
+    } else {
+      this.dom.$elLoadInputWrap.classList.remove("compact");
+      this.dom.$elLoadInputWrap.removeAttribute("hidden");
+      this.changeState("default");
+      this.hiddenSubmitBtn();
     }
   }
   // #helpers  =========
@@ -345,8 +515,8 @@ class DND {
 
 
 const dragNdrop = new DND("#dragdrop", {
-  actionPath: "heheheh",
-  allowedTypes: ["png", "jpg", "jpeg"],
+  allowedTypes: ["jpg", "jpeg", "png"],
   multiple: true,
   maxSize: 2
 });
+
