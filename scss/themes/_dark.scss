@@ -1,6 +1,6 @@
 // ============================
 // DARK THEME
-.dnd[data-theme="dark"] {
+.dnd[data-theme="dark"], .dnd[data-theme="dark_r"] {
   // colors:
   --green: #51cf17;
   --green_active: #49b914;
@@ -21,9 +21,9 @@
   --load_btn_compact: var(--green);
   --load_btn_compact_h: var(--green_active);
 
-  --alert_warning_bg: #f3f736;
-  --alert_warning_border: #dee033;
-  --alert_warning_text: #6f700e;
+  --alert_warning_bg: #ffdb3a;
+  --alert_warning_border: transparent;
+  --alert_warning_text: #313131;
 
   --alert_danger_bg: rgb(238, 70, 70);
   --alert_danger_border: transparent;
@@ -33,7 +33,11 @@
   --submit_btn_bg: #42a812;
   --submit_btn_bg_h: #3c8a18;
 
-  --upload_img_text: #b6b6b6;
+  --upload_img_text: #c7c7c7;
+
+  --default_preview_bg: #727272;
+  --default_preview_border: #a1a1a1;
+  --default_preview_icon: #e6e6e6;
 
   ::-webkit-scrollbar {
     background-color: rgb(107, 107, 107);
@@ -42,6 +46,20 @@
 
   ::-webkit-scrollbar-thumb {
     background: #d4d4d4;
+  }
+}
+
+.dnd[data-theme="dark_r"].filled.over .dnd__offer,
+.dnd[data-theme="dark"].filled.over .dnd__offer {
+  background: #42a812;
+  color: #fff;
+
+  .dnd__title {
+    color: #fff;
+  }
+
+  .dnd__offer_icon path {
+    fill: #fff;
   }
 }
 

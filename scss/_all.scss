@@ -39,6 +39,10 @@
 
   --upload_img_text: #1a1a1a;
 
+  --default_preview_bg: #fcfcfc;
+  --default_preview_border: #dfdfdf;
+  --default_preview_icon: #727272;
+
   ::-webkit-scrollbar {
     background-color: rgb(216, 216, 216);
     width: 6px;
@@ -51,7 +55,89 @@
 
 // ============================
 
+// SIZES
+
+// size
+.dnd[data-size="sm"] {
+  max-width: 300px;
+
+  .dnd__wrap {
+    min-height: 160px;
+    height: 160px;
+  }
+}
+
+.dnd[data-size="md"] {
+  max-width: 420px;
+
+  .dnd__wrap {
+    height: 200px;
+  }
+}
+
+.dnd[data-size="lg"] {
+  max-width: 520px;
+
+  .dnd__wrap {
+    height: 350px;
+  }
+}
+
+.dnd[data-size="full"] {
+  max-width: 100%;
+
+  .dnd__wrap {
+    height: 100%;
+  }
+}
+
+// width
+.dnd[data-width="sm"] {
+  max-width: 300px;
+}
+
+.dnd[data-width="md"] {
+  max-width: 420px;
+}
+
+.dnd[data-width="lg"] {
+  max-width: 520px;
+}
+
+.dnd[data-width="full"] {
+  max-width: none;
+}
+
+// height
+.dnd[data-height="sm"] {
+  .dnd__wrap {
+    min-height: 160px;
+    height: 160px;
+  }
+}
+
+.dnd[data-height="md"] {
+  .dnd__wrap {
+    height: 200px;
+  }
+}
+
+.dnd[data-height="lg"] {
+  .dnd__wrap {
+    height: 350px;
+  }
+}
+
+.dnd[data-height="full"] {
+  .dnd__wrap {
+    height: 100%;
+  }
+}
+
+// ============================
+
 .dnd__wrap {
+  box-sizing: border-box;
   width: 100%;
   min-height: 200px;
   position: relative;
@@ -163,7 +249,7 @@
   display: none;
 }
 
-.dnd__upload_images {
+.dnd__upload_files {
   position: absolute;
   top: 10px;
   left: 10px;
@@ -174,13 +260,17 @@
   height: 90%;
 }
 
-.dnd__upload_img {
+.dnd__upload_file {
   display: flex;
   flex-direction: column;
   max-width: 30%;
 }
 
-.dnd__upload_img_wrap {
+.dnd__upload_file_empty {
+  display: none;
+}
+
+.dnd__upload_file_wrap {
   aspect-ratio: 16/9;
   width: 100%;
   overflow: hidden;
@@ -195,13 +285,13 @@
   }
 
   &:hover {
-    .dnd__upload_img_delete_btn {
+    .dnd__upload_file_delete_btn {
       display: block;
     }
   }
 }
 
-.dnd__upload_img_title {
+.dnd__upload_file_title {
   margin-top: 3px;
   font-size: 12px;
   max-width: 100%;
@@ -211,7 +301,7 @@
   color: var(--upload_img_text);
 }
 
-.dnd__upload_img_delete_btn {
+.dnd__upload_file_delete_btn {
   background: none;
   border: none;
   display: none;
@@ -221,13 +311,13 @@
   left: 50%;
 }
 
-.dnd__upload_img_delete_btn svg {
+.dnd__upload_file_delete_btn svg {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 24px;
-  filter: drop-shadow(0 0 10px rgba(0, 0, 0, .5));
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, .3));
   width: 20px;
 
   path {
@@ -244,7 +334,7 @@
   margin-top: 10px;
   background: var(--submit_btn_bg);
   color: var(--submit_btn_text);
-  border: none;
+  border: 1px solid transparent;
   padding: 6px 10px;
   transition: .3s;
   cursor: pointer;
@@ -261,6 +351,7 @@
   top: 10px;
   right: 10px;
   row-gap: 5px;
+  pointer-events: none;
 }
 
 .dnd__alert {
@@ -292,6 +383,10 @@
     display: none;
   }
 
+  .dnd__upload_files {
+    pointer-events: none;
+  }
+
   .dnd__file_wrap {
     pointer-events: none;
     display: none;
@@ -306,6 +401,10 @@
 .dnd.filled {
   .dnd__offer {
     display: none;
+  }
+
+  .dnd__upload_files {
+    width: 97%;
   }
 }
 
@@ -325,13 +424,15 @@
   .dnd__offer {
     display: flex;
     position: absolute;
-    right: 10px;
-    bottom: 5px;
+    right: 15px;
+    bottom: 8px;
     flex-direction: row;
     column-gap: 5px;
+    z-index: 4;
+    padding: 3px 8px;
 
     .dnd__offer_icon {
-      width: 25px;
+      width: 20px;
     }
 
     span {
@@ -341,22 +442,58 @@
 
   .dnd__title {
     display: block;
+    margin: 0;
+    font-size: 12px;
   }
 
-  .dnd__upload_img {
+  .dnd__upload_file {
     pointer-events: none;
   }
 }
 
-@media (pointer:coarse){
+.dnd.filled.over .dnd__offer {
+  background: var(--green);
+  color: #fff;
+
+  .dnd__title {
+    color: #fff;
+  }
+
+  .dnd__offer_icon path {
+    fill: #fff;
+  }
+}
+
+.dnd__upload_file[data-default] {
+  width: 100%;
+
+  .dnd__upload_file_wrap {
+    background: var(--default_preview_bg);
+    border: 1px solid var(--default_preview_border);
+  }
+
+  .dnd__upload_file_empty {
+    pointer-events: none;
+    display: block;
+    width: 30px;
+    height: 40px;
+
+    path {
+      fill: var(--default_preview_icon);
+    }
+  }
+}
+
+@media (pointer:coarse) {
   body {
-    .dnd__upload_img_delete_btn {
+    .dnd__upload_file_delete_btn {
       display: block;
       right: 6px;
       top: 8px;
       left: auto;
 
-      &::after, &::before {
+      &::after,
+      &::before {
         content: "";
         position: absolute;
         top: 00px;
@@ -383,8 +520,13 @@
   }
 }
 
-@media (max-width: 420px ) {
-  .dnd__upload_img {
+@media (max-width: 420px) {
+  .dnd__upload_file {
     max-width: 45%;
+  }
+
+  .dnd__submit_btn {
+    width: 100%;
+    padding: 10px;
   }
 }

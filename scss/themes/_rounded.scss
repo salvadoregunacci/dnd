@@ -1,0 +1,26 @@
+.dnd[data-theme="light_r"],
+.dnd[data-theme="dark_r"],
+.dnd[data-theme="light_g_r"],
+.dnd[data-theme="dark_g_r"] {
+  .dnd__wrap {
+    border-radius: 8px;
+  }
+
+  .dnd__submit_btn,
+  .dnd__file_label {
+    border-radius: 4px;
+  }
+
+  .dnd__upload_file_wrap,
+  .dnd__upload_file_wrap img {
+    border-radius: 4px;
+  }
+
+  &.filled.over .dnd__offer {
+    border-radius: 3px;
+  }
+
+  .dnd__alert {
+    border-radius: 2px;
+  }
+}

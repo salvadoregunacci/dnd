@@ -1,0 +1,74 @@
+// ============================
+// DARK THEME
+.dnd[data-theme="dark_g_r"],
+.dnd[data-theme="dark_g"] {
+  // colors:
+  --green: #51cf17;
+  --green_active: #49b914;
+
+  // elements
+  --dropzone_bg: linear-gradient(to bottom , #37105f, #0e4666);
+  --dropzone_bg_h: linear-gradient(to bottom , #37105f, #0e4666);
+  --dropzone_border: #7c10d4;
+  --dropzone_border_a: #1086d4;
+  --dropzone_title_text: #d1d1d1;
+  --dropzone_icon: #bebebe;
+
+  --load_btn_full: #8175ec;
+  --load_btn_full_h: #6b60cf;
+  --load_btn_full_border: transparent;
+  --load_btn_full_text: #ebebeb;
+  --load_btn_compact_bg: #382286;
+  --load_btn_compact: #33c2fa;
+  --load_btn_compact_h: #29abdf;
+
+  --alert_warning_bg: #fdc62e;
+  --alert_warning_border: transparent;
+  --alert_warning_text: rgb(54, 54, 54);
+
+  --alert_danger_bg: rgb(238, 70, 70);
+  --alert_danger_border: transparent;
+  --alert_danger_text: #fff;
+
+  --submit_btn_text: #fff;
+  --submit_btn_bg: #4c24ff;
+  --submit_btn_bg_h: #3d18e4;
+
+  --upload_img_text: #d4d4d4;
+
+  --default_preview_bg: #24323b;
+  --default_preview_border: #2fa3d14b;
+  --default_preview_icon: #2fa3d1;
+
+  ::-webkit-scrollbar {
+    background-color: rgb(107, 107, 107);
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d4d4d4;
+  }
+}
+
+.dnd[data-theme="dark_g_r"].over,
+.dnd[data-theme="dark_g"].over {
+  .dnd__wrap {
+    box-shadow: inset 0 0 10px #1086d4;
+  }
+}
+
+.dnd[data-theme="dark_g_r"].filled.over .dnd__offer,
+.dnd[data-theme="dark_g"].filled.over .dnd__offer {
+  background: #4c24ff;
+  color: #fff;
+
+  .dnd__title {
+    color: #fff;
+  }
+
+  .dnd__offer_icon path {
+    fill: #fff;
+  }
+}
+
+// ============================
