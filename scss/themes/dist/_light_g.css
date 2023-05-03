@@ -1,0 +1,61 @@
+.dnd[data-theme=light_g_r],
+.dnd[data-theme=light_g] {
+  --green: #51cf17;
+  --green_active: #49b914;
+  --dropzone_bg: linear-gradient(to bottom, #a1f5f1, #fad2fa);
+  --dropzone_bg_h: linear-gradient(to bottom, #a1f5f1, #fad2fa);
+  --dropzone_border: #c4c4c4;
+  --dropzone_border_a: rgb(88, 206, 88);
+  --dropzone_title_text: #5c5c5c;
+  --dropzone_icon: #ffffff;
+  --load_btn_full: #ffffff;
+  --load_btn_full_h: #eeeeee;
+  --load_btn_full_border: #d6d6d6;
+  --load_btn_full_text: #3f3f3f;
+  --load_btn_compact_bg: #ffffff;
+  --load_btn_compact: var(--green);
+  --load_btn_compact_h: var(--green_active);
+  --alert_warning_bg: #f3f736;
+  --alert_warning_border: #dee033;
+  --alert_warning_text: #6f700e;
+  --alert_danger_bg: rgb(238, 70, 70);
+  --alert_danger_border: transparent;
+  --alert_danger_text: #fff;
+  --submit_btn_text: #fff;
+  --submit_btn_bg: var(--green);
+  --submit_btn_bg_h: var(--green_active);
+  --upload_img_text: #1a1a1a;
+  --default_preview_bg: #f4fdff;
+  --default_preview_border: #c3d0d3;
+  --default_preview_icon: #b3cacf;
+}
+.dnd[data-theme=light_g_r] ::-webkit-scrollbar,
+.dnd[data-theme=light_g] ::-webkit-scrollbar {
+  background-color: #b1ebe8b0;
+  width: 6px;
+}
+.dnd[data-theme=light_g_r] ::-webkit-scrollbar-thumb,
+.dnd[data-theme=light_g] ::-webkit-scrollbar-thumb {
+  background: #b8b8b8;
+}
+
+.dnd[data-theme=light_g_r].over .dnd__wrap,
+.dnd[data-theme=light_g].over .dnd__wrap {
+  background: var(--dropzone_bg);
+  box-shadow: inset 0 0 15px rgba(45, 245, 55, 0.329);
+  border: 2px dashed var(--dropzone_border_a);
+}
+
+.dnd[data-theme=light_g_r].filled.over .dnd__offer,
+.dnd[data-theme=light_g].filled.over .dnd__offer {
+  background: var(--green);
+  color: #fff;
+}
+.dnd[data-theme=light_g_r].filled.over .dnd__offer .dnd__title,
+.dnd[data-theme=light_g].filled.over .dnd__offer .dnd__title {
+  color: #fff;
+}
+.dnd[data-theme=light_g_r].filled.over .dnd__offer .dnd__offer_icon path,
+.dnd[data-theme=light_g].filled.over .dnd__offer .dnd__offer_icon path {
+  fill: #fff;
+}

@@ -369,7 +369,7 @@
 .dnd__alert[data-type="danger"] {
   background: rgb(238, 70, 70);
   color: var(--alert_danger_text);
-  border: none;
+  border: 1px solid transparent;
 }
 
 .dnd__offer,
@@ -485,37 +485,35 @@
 }
 
 @media (pointer:coarse) {
-  body {
-    .dnd__upload_file_delete_btn {
-      display: block;
-      right: 6px;
-      top: 8px;
-      left: auto;
+  .dnd__upload_file_delete_btn {
+    display: block;
+    right: 6px;
+    top: 8px;
+    left: auto;
 
-      &::after,
-      &::before {
-        content: "";
-        position: absolute;
-        top: 00px;
-        left: 0px;
-        display: inline-block;
-        width: 15px;
-        height: 2px;
-        background: red;
-      }
+    &::after,
+    &::before {
+      content: "";
+      position: absolute;
+      top: 00px;
+      left: 0px;
+      display: inline-block;
+      width: 15px;
+      height: 2px;
+      background: red;
+    }
 
-      &::after {
-        transform: rotate(45deg);
-      }
+    &::after {
+      transform: rotate(45deg);
+    }
 
-      &::before {
-        transform: rotate(-45deg);
-      }
+    &::before {
+      transform: rotate(-45deg);
+    }
 
 
-      svg {
-        display: none;
-      }
+    svg {
+      display: none;
     }
   }
 }

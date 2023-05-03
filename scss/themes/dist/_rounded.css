@@ -1,0 +1,38 @@
+.dnd[data-theme=light_r] .dnd__wrap,
+.dnd[data-theme=dark_r] .dnd__wrap,
+.dnd[data-theme=light_g_r] .dnd__wrap,
+.dnd[data-theme=dark_g_r] .dnd__wrap {
+  border-radius: 8px;
+}
+.dnd[data-theme=light_r] .dnd__submit_btn,
+.dnd[data-theme=light_r] .dnd__file_label,
+.dnd[data-theme=dark_r] .dnd__submit_btn,
+.dnd[data-theme=dark_r] .dnd__file_label,
+.dnd[data-theme=light_g_r] .dnd__submit_btn,
+.dnd[data-theme=light_g_r] .dnd__file_label,
+.dnd[data-theme=dark_g_r] .dnd__submit_btn,
+.dnd[data-theme=dark_g_r] .dnd__file_label {
+  border-radius: 4px;
+}
+.dnd[data-theme=light_r] .dnd__upload_file_wrap,
+.dnd[data-theme=light_r] .dnd__upload_file_wrap img,
+.dnd[data-theme=dark_r] .dnd__upload_file_wrap,
+.dnd[data-theme=dark_r] .dnd__upload_file_wrap img,
+.dnd[data-theme=light_g_r] .dnd__upload_file_wrap,
+.dnd[data-theme=light_g_r] .dnd__upload_file_wrap img,
+.dnd[data-theme=dark_g_r] .dnd__upload_file_wrap,
+.dnd[data-theme=dark_g_r] .dnd__upload_file_wrap img {
+  border-radius: 4px;
+}
+.dnd[data-theme=light_r].filled.over .dnd__offer,
+.dnd[data-theme=dark_r].filled.over .dnd__offer,
+.dnd[data-theme=light_g_r].filled.over .dnd__offer,
+.dnd[data-theme=dark_g_r].filled.over .dnd__offer {
+  border-radius: 3px;
+}
+.dnd[data-theme=light_r] .dnd__alert,
+.dnd[data-theme=dark_r] .dnd__alert,
+.dnd[data-theme=light_g_r] .dnd__alert,
+.dnd[data-theme=dark_g_r] .dnd__alert {
+  border-radius: 2px;
+}

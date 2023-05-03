@@ -1,0 +1,51 @@
+.dnd[data-theme=dark], .dnd[data-theme=dark_r] {
+  --green: #51cf17;
+  --green_active: #49b914;
+  --dropzone_bg: #9c9c9c1e;
+  --dropzone_bg_h: #5edf5e1f;
+  --dropzone_border: #777777;
+  --dropzone_border_a: rgb(64, 136, 64);
+  --dropzone_title_text: #9c9c9c;
+  --dropzone_icon: #8d8d8d;
+  --load_btn_full: #eeeeee;
+  --load_btn_full_h: #cfcfcf;
+  --load_btn_full_border: #c9c9c9;
+  --load_btn_full_text: #2c2c2c;
+  --load_btn_compact_bg: #414141;
+  --load_btn_compact: var(--green);
+  --load_btn_compact_h: var(--green_active);
+  --alert_warning_bg: #ffdb3a;
+  --alert_warning_border: transparent;
+  --alert_warning_text: #313131;
+  --alert_danger_bg: rgb(238, 70, 70);
+  --alert_danger_border: transparent;
+  --alert_danger_text: #fff;
+  --submit_btn_text: #fff;
+  --submit_btn_bg: #42a812;
+  --submit_btn_bg_h: #3c8a18;
+  --upload_img_text: #c7c7c7;
+  --default_preview_bg: #727272;
+  --default_preview_border: #a1a1a1;
+  --default_preview_icon: #e6e6e6;
+}
+.dnd[data-theme=dark] ::-webkit-scrollbar, .dnd[data-theme=dark_r] ::-webkit-scrollbar {
+  background-color: #6b6b6b;
+  width: 6px;
+}
+.dnd[data-theme=dark] ::-webkit-scrollbar-thumb, .dnd[data-theme=dark_r] ::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+}
+
+.dnd[data-theme=dark_r].filled.over .dnd__offer,
+.dnd[data-theme=dark].filled.over .dnd__offer {
+  background: #42a812;
+  color: #fff;
+}
+.dnd[data-theme=dark_r].filled.over .dnd__offer .dnd__title,
+.dnd[data-theme=dark].filled.over .dnd__offer .dnd__title {
+  color: #fff;
+}
+.dnd[data-theme=dark_r].filled.over .dnd__offer .dnd__offer_icon path,
+.dnd[data-theme=dark].filled.over .dnd__offer .dnd__offer_icon path {
+  fill: #fff;
+}

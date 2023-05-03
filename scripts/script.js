@@ -19,6 +19,8 @@ class DND {
       $container: null,
     };
 
+    this.dom.$container = document.querySelector(createWrap);
+
     this._eHandlers = {
       deleteFile: this._deleteFileHandler.bind(this),
       dragenter: this._dragEnterHandler.bind(this),
@@ -33,14 +35,32 @@ class DND {
       containerSelector: createWrap,
       actionPath: options.actionPath || "#",
       multiple: options.multiple || false,
-      maxFiles: options.maxFiles || 1,
+      maxFiles: options.maxFiles || 2,
       allowedTypes: options.allowedTypes || "*",
       theme: options.theme || "light",
       onlyImage: options.onlyImage || false,
       width: options.width || "md",
       height: options.height || "md",
       size: options.size || "md",
+      showFileName: true,
+      submitName: options.submitName || "files",
+      timeShowAlert: options.timeShowAlert || 3500,
+      langs: {}
     };
+
+    if ("onlyPhoto" in options) this._options.onlyImage = options.onlyPhoto;
+
+    const _langs = this._getLangsFromDOM();
+
+    if (_langs && Object.keys(_langs).length > 0) {
+      for (const key in _langs) {
+        if (Object.hasOwnProperty.call(_langs, key)) {
+          const element = _langs[key];
+
+          this._options.langs[key] = element;
+        }
+      }
+    }
 
     if ("customize" in options) {
       for (const key in options.customize) {
@@ -48,6 +68,15 @@ class DND {
           const element = options.customize[key];
 
           this._options[key] = element;
+        }
+      }
+    }
+
+    if ("langs" in options) {
+      for (const key in options.langs) {
+        if (Object.hasOwnProperty.call(options.langs, key)) {
+          const element = options.langs[key];
+          this._options.langs[key] = element;
         }
       }
     }
@@ -65,29 +94,35 @@ class DND {
       this._options.bannedTypes = options.bannedTypes;
     }
 
+    if ("allowedTypes" in options && typeof options.allowedTypes === "string" && options.allowedTypes != "*") {
+      this._options.allowedTypes = options.allowedTypes.split(",").map(item => item.trim());
+    }
+
+    if ("bannedTypes" in options && typeof options.bannedTypes === "string") {
+      this._options.bannedTypes = options.bannedTypes.split(",").map(item => item.trim());
+    }
+
     this._addActionPath(createWrap);
 
     this.__ = {
-      saveBtnTxt: "Сохранить",
-      loadBtnTxt: `Выберите файл${this._options.multiple ? "ы" : ""}`,
+      saveBtnTxt: this._options.langs.submitBtn || "Сохранить",
+      loadBtnTxt: this._options.langs.loadBtn || `Выберите файл${this._options.multiple ? "ы" : ""}`,
       title: {
-        default: `Перетащите файл${this._options.multiple ? "ы" : ""} сюда`,
-        drop: "Отпустите файл",
+        default: this._options.langs.titleDefault || `Перетащите файл${this._options.multiple ? "ы" : ""} сюда`,
+        drop: this._options.langs.titleDrop || "Отпустите файл",
       },
       alertTxt: {
-        selectPhoto: "Выберите файлы для загрузки"
+        selectPhoto: this._options.langs.selectFileAlert || "Выберите файлы для загрузки"
       },
       err: {
-        default: "Произошла ошибка",
-        fileTypeNotAllowed: "Можно загрузить только фото",
-        fileTypeNotSupported: `Доступные форматы: "${Array.from(this._options.allowedTypes).join(", ")}"`,
-        thisFileTypeNotSupported: "Этот формат не допустим",
-        maxFiles: "Максимальное к-во элементов: " + this._options.maxFiles,
-        dublicateFile: "Файл уже загружен"
+        default: this._options.langs.hasErr || "Произошла ошибка",
+        fileTypeNotAllowed: this._options.langs.onlyPhoto || "Можно загрузить только фото",
+        fileTypeNotSupported: this._options.langs.typeNotSupported || "Формат файла не поддерживается",
+        maxFiles: this._options.langs.maxFiles || "Максимальное к-во элементов: " + this._options.maxFiles,
+        dublicateFile: this._options.langs.reloadFile || "Файл уже загружен"
       }
     };
 
-    this.dom.$container = document.querySelector(createWrap);
     this.customFields = this._getCustomFields();
     this._init();
   }
@@ -148,6 +183,27 @@ class DND {
 
   _addToDOM() {
     this.dom.$container.innerHTML += this._getHtml();
+  }
+
+
+  _getLangsFromDOM() {
+    if (!this.dom.$container) return;
+
+    const _langsList = this.dom.$container.querySelector(".dnd_langs");
+    const _langs = {};
+
+    if (!_langsList) return;
+
+    for (let item of _langsList.children) {
+      const key = item.getAttribute("data-to");
+
+      if (key) {
+        _langs[key] = item.textContent;
+      }
+    }
+
+    _langsList.remove();
+    return _langs;
   }
 
 
@@ -413,21 +469,24 @@ class DND {
           const _type = file.type.replace(/^image\//, "");
 
           if (typeof this._options.bannedTypes == "string") {
-            if (_type == this._options.bannedTypes) return { errType: "warning", errMsg: this.__.err.thisFileTypeNotSupported, status: false }
+            if (_type == this._options.bannedTypes) return { errType: "warning", errMsg: this.__.err.fileTypeNotSupported, status: false }
           } else if (Array.isArray(this._options.bannedTypes) && this._options.bannedTypes.includes(_type)) {
-            return { errType: "warning", errMsg: this.__.err.thisFileTypeNotSupported, status: false };
+            return { errType: "warning", errMsg: this.__.err.fileTypeNotSupported, status: false };
           }
         }
 
-        if (typeof (this._options.allowedTypes) === "string") {
-          if (this._options.allowedTypes === "*") {
-            return { status: true };
+        if (this._options.allowedTypes === "*") {
+          if (this._options.onlyImage && !file.type.startsWith("image/")) {
+            return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
           }
 
-          return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
+          return { status: true };
         } else if (Array.isArray(this._options.allowedTypes)) {
 
-          if (this._options.onlyImage && !file.type.startsWith("image/")) return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
+          if (this._options.onlyImage && !file.type.startsWith("image/")) {
+            return { errType: "danger", errMsg: this.__.err.fileTypeNotAllowed, status: false };
+          }
+
 
           const _type = file.type.replace(/^image\//, "");
 
@@ -475,7 +534,7 @@ class DND {
         <button hidden class="dnd__submit_btn">${this.__.saveBtnTxt}</button>
 
         <form hidden class="dnd__form" action="${this._options.actionPath}" method="POST" enctype="multipart/form-data">
-            <input type="file" name="files[]" class="dnd__file_input" ${this._options.multiple ? "multiple" : ""} />
+            <input type="file" name="${this._options.submitName}${this._options.multiple ? "[]" : ""}" class="dnd__file_input" ${this._options.multiple ? "multiple" : ""} />
         </form>
 
         <style>
@@ -556,6 +615,33 @@ class DND {
             .dnd__upload_file_title {
               ${this._options.showFileName ? "display: block;" : "display: none;"};
             }
+
+            .dnd__upload_file_delete_btn svg path {
+              ${this._options.previewDeleteBtn ? "fill:" + this._options.previewDeleteBtn + ";" : ""};
+            }
+
+            .dnd__upload_file_delete_btn svg:hover path {
+              ${this._options.previewDeleteBtnHover ? "fill:" + this._options.previewDeleteBtnHover + ";" : ""};
+            }
+
+            .dnd__alert[data-type="warning"] {
+              ${this._options.alertWarningBg ? "background:" + this._options.alertWarningBg + ";" : ""};
+              ${this._options.alertWarningText ? "color:" + this._options.alertWarningText + ";" : ""};
+              ${this._options.alertWarningBorder ? "border-color:" + this._options.alertWarningBorder + ";" : ""};
+            }
+
+            .dnd__alert[data-type="danger"] {
+              ${this._options.alertDangerBg ? "background:" + this._options.alertDangerBg + ";" : ""};
+              ${this._options.alertDangerText ? "color:" + this._options.alertDangerText + ";" : ""};
+              ${this._options.alertDangerBorder ? "border-color:" + this._options.alertDangerBorder + ";" : ""};
+            }
+
+            @media (pointer:coarse) {
+              .dnd__upload_file_delete_btn::after,
+              .dnd__upload_file_delete_btn::before {
+                ${this._options.previewDeleteBtnCompact ? "background:" + this._options.previewDeleteBtnCompact + ";" : ""};
+              }
+            }
           }
         </style>
     </div>
@@ -568,7 +654,7 @@ class DND {
     this.dom.$elInnerTitle.textContent = newTxt;
   }
 
-  showAlert(msg = "", type = "warning", timeToShow = 3500) {
+  showAlert(msg = "", type = "warning", timeToShow = this._options.timeShowAlert) {
     const $availableAlerts = document.querySelectorAll('.dnd__alert');
 
     if ($availableAlerts) {
@@ -640,16 +726,6 @@ class DND {
   // #helpers  =========
 }
 
-
-const dragNdrop = new DND("#dragdrop", {
-  theme: "dark_g",
-  onlyImage: false,
-  multiple: false,
-  maxFiles: 8,
-  size: "md",
-  showFileName: false
-});
-
 // customize: {
     // dropzone: "",
     // dropzoneHover: "",
@@ -677,5 +753,7 @@ const dragNdrop = new DND("#dragdrop", {
     // defaultPreviewBorder: "",
     // defaultPreviewIcon: "",
     // previewFileName: "",
+    // previewDeleteBtn: ""
+    // previewDeleteBtnHover: ""
   // }
 
